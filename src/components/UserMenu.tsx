@@ -222,20 +222,20 @@ const UserMenu: React.FC<UserMenuProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Botones */}
-        <div className="flex gap-3">
-          <button
-            onClick={() => setCurrentView('view-complaints')}
-            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
-          >
-            <Eye className="w-4 h-4" />
-            Ver mis {complaintType === 'queja' ? 'quejas' : 'sugerencias'}
-          </button>
+        <div className="space-y-3">
           <button
             onClick={handleSubmitComplaint}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
           >
             <Send className="w-4 h-4" />
             Enviar {complaintType}
+          </button>
+          <button
+            onClick={() => setCurrentView('view-complaints')}
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+          >
+            <Eye className="w-4 h-4" />
+            Ver mis quejas y sugerencias
           </button>
         </div>
       </div>
