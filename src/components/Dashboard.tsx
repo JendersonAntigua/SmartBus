@@ -362,7 +362,7 @@ const QRCodeView: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
                   <div className="text-center">
                     <QrCode className="w-16 h-16 text-gray-400 mx-auto mb-2" />
                     <p className="text-sm text-gray-500">Código QR</p>
-                    <p className="text-xs text-gray-400">SMARTBUS-2024</p>
+                    <p className="text-xs text-gray-400">SMARTBUS</p>
                   </div>
                 </div>
               </div>
