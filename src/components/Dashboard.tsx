@@ -384,9 +384,13 @@ const QRCodeView: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
           {/* Mensaje informativo cuando no hay saldo */}
           {balance === 0 && (
             <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg mb-4">
-              <p className="text-sm text-blue-800 dark:text-blue-200">
-                Si tienes saldo disponible, dirigete a "QR y Saldo". De lo contrario recarga para visualizar el código QR.
-              </p>
+              <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">Instrucciones de uso:</h3>
+              <ol className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                <li>1. Muestra este código QR al conductor</li>
+                <li>2. El conductor escaneará el código</li>
+                <li>3. Confirma tu destino</li>
+                <li>4. Se descontará automáticamente el pasaje</li>
+              </ol>
             </div>
           )}
 
