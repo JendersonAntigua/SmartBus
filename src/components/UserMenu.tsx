@@ -7,11 +7,10 @@ interface UserMenuProps {
   onClose: () => void;
 }
 
-type ComplaintType = 'queja' | 'sugerencia';
 
 interface Complaint {
   id: string;
-  type: ComplaintType;
+  type: 'queja' | 'sugerencia';
   message: string;
   date: string;
   status: 'pendiente' | 'revisado';
@@ -23,7 +22,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ isOpen, onClose }) => {
     return document.documentElement.classList.contains('dark');
   });
   const [currentView, setCurrentView] = useState<'menu' | 'complaints' | 'view-complaints'>('menu');
-  const [complaintType, setComplaintType] = useState<ComplaintType>('queja');
+  const [complaintType, setComplaintType] = useState<'queja' | 'sugerencia'>('queja');
   const [complaintMessage, setComplaintMessage] = useState('');
   const [complaints, setComplaints] = useState<Complaint[]>([
     {
@@ -187,7 +186,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ isOpen, onClose }) => {
                 value="queja"
                 checked={complaintType === 'queja'}
                 onChange={() => setComplaintType('queja')}
-                className="mr-2"
+                onChange={() => setComplaintType('queja')}
               />
               <span className="text-sm text-gray-700 dark:text-gray-300">Queja</span>
             </label>
@@ -207,7 +206,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ isOpen, onClose }) => {
         {/* Mensaje */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Tu {complaintType}
+                onChange={() => setComplaintType('sugerencia')}
           </label>
           <textarea
             value={complaintMessage}
@@ -226,7 +225,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ isOpen, onClose }) => {
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <Send className="w-4 h-4" />
-            {complaintType === 'queja' ? 'Enviar Queja' : 'Enviar Sugerencia'}
+            Enviar {complaintType === 'queja' ? 'Queja' : 'Sugerencia'}
           </button>
 
           <button
