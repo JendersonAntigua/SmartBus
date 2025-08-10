@@ -344,13 +344,13 @@ const PayPalModal: React.FC<PayPalModalProps> = ({ isOpen, onClose, amount, onPa
   };
 
   const renderLogin = () => (
-    <div className="min-h-[600px] bg-white flex flex-col">
+    <div className="min-h-[500px] bg-white flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-3 border-b border-gray-200">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-          <span className="text-sm text-gray-600">Secure</span>
-          <span className="text-sm text-gray-500">https://www.sandbox.paypal.com/webapps/auth</span>
+          <span className="text-xs text-gray-600">Secure</span>
+          <span className="text-xs text-gray-500 hidden sm:inline">https://www.sandbox.paypal.com/webapps/auth</span>
         </div>
         <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
           <X className="w-5 h-5" />
@@ -358,21 +358,21 @@ const PayPalModal: React.FC<PayPalModalProps> = ({ isOpen, onClose, amount, onPa
       </div>
 
       {/* PayPal Content */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
         {/* PayPal Logo */}
-        <div className="mb-8">
+        <div className="mb-4 sm:mb-6">
           <div className="flex items-center gap-1">
             <div className="bg-blue-600 text-white px-2 py-1 rounded text-lg font-bold">Pay</div>
             <div className="bg-blue-400 text-white px-2 py-1 rounded text-lg font-bold">Pal</div>
           </div>
         </div>
 
-        <h1 className="text-2xl font-normal text-gray-800 mb-8">Iniciar sesión con PayPal</h1>
+        <h1 className="text-xl sm:text-2xl font-normal text-gray-800 mb-4 sm:mb-6">Iniciar sesión con PayPal</h1>
         {/* Login Form */}
-        <div className="w-full max-w-sm space-y-4">
+        <div className="w-full max-w-sm space-y-3">
           {/* Error Message */}
           {loginError && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            <div className="flex items-center gap-2 p-2 bg-red-50 border border-red-200 rounded-lg text-red-700">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <span className="text-sm">{loginError}</span>
             </div>
@@ -384,7 +384,7 @@ const PayPalModal: React.FC<PayPalModalProps> = ({ isOpen, onClose, amount, onPa
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+              className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               placeholder="Dirección de correo electrónico"
               disabled={isLoading}
             />
@@ -396,14 +396,14 @@ const PayPalModal: React.FC<PayPalModalProps> = ({ isOpen, onClose, amount, onPa
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base pr-12"
+              className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base pr-10 sm:pr-12"
               placeholder="Contraseña"
               disabled={isLoading}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+              className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 disabled:opacity-50"
               disabled={isLoading}
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -413,7 +413,7 @@ const PayPalModal: React.FC<PayPalModalProps> = ({ isOpen, onClose, amount, onPa
           <button
             onClick={handleLogin}
             disabled={isLoading || !email || !password}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded font-medium transition-colors disabled:opacity-50"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 px-4 rounded font-medium transition-colors disabled:opacity-50 text-sm sm:text-base"
           >
             {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </button>
@@ -422,7 +422,7 @@ const PayPalModal: React.FC<PayPalModalProps> = ({ isOpen, onClose, amount, onPa
             <button
               type="button"
               onClick={() => setCurrentView('forgot-password')} 
-              className="text-blue-600 hover:text-blue-800 text-sm underline"
+              className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm underline"
             >
               ¿Problemas para iniciar sesión?
             </button>
@@ -430,18 +430,18 @@ const PayPalModal: React.FC<PayPalModalProps> = ({ isOpen, onClose, amount, onPa
         </div>
 
         {/* Sign Up Button */}
-        <div className="w-full max-w-sm mt-8">
+        <div className="w-full max-w-sm mt-4 sm:mt-6">
           <button
             type="button"
             onClick={() => setCurrentView('register')}
-            className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-4 rounded font-medium transition-colors"
+            className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 sm:py-3 px-4 rounded font-medium transition-colors text-sm sm:text-base"
           >
             Registrarse
           </button>
         </div>
 
         {/* Footer */}
-        <div className="mt-12 text-center text-xs text-gray-500 space-y-1">
+        <div className="mt-6 sm:mt-8 text-center text-xs text-gray-500 space-y-1">
           <div className="flex items-center justify-center gap-4">
             <a href="#" className="hover:text-gray-700">Privacidad</a>
             <a href="#" className="hover:text-gray-700">PayPal</a>
@@ -449,7 +449,7 @@ const PayPalModal: React.FC<PayPalModalProps> = ({ isOpen, onClose, amount, onPa
           <p>Copyright © 1999-2024 PayPal. Todos los derechos reservados.</p>
           
           {/* Credenciales de prueba */}
-          <div className="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200">
             <p className="text-xs font-semibold text-gray-700 mb-2">Credenciales de prueba:</p>
             <div className="text-xs text-gray-600 space-y-1">
               <p><strong>Email:</strong> usuario@paypal.com | <strong>Contraseña:</strong> 1234</p>
@@ -943,7 +943,7 @@ const PayPalModal: React.FC<PayPalModalProps> = ({ isOpen, onClose, amount, onPa
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
-      <div className="bg-white rounded-lg shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-2xl max-w-md w-full max-h-[95vh] overflow-y-auto">
         {currentView === 'login' && renderLogin()}
         {currentView === 'register' && renderRegister()}
         {currentView === 'forgot-password' && renderForgotPassword()}
