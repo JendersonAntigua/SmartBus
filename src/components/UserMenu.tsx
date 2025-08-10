@@ -42,7 +42,6 @@ const UserMenu: React.FC<UserMenuProps> = ({ isOpen, onClose }) => {
     }
   ]);
 
-  // Resetear vista al menú principal cuando se abra o cierre el modal
   React.useEffect(() => {
     if (isOpen) {
       setCurrentView('menu');
@@ -181,9 +180,11 @@ const UserMenu: React.FC<UserMenuProps> = ({ isOpen, onClose }) => {
             Tipo de mensaje
           </label>
           <div className="flex gap-4">
-            <label className="flex items-center">
+            <label htmlFor="radio-queja" className="flex items-center cursor-pointer">
               <input
+                id="radio-queja"
                 type="radio"
+                name="tipo"
                 value="queja"
                 checked={complaintType === 'queja'}
                 onChange={() => setComplaintType('queja')}
@@ -191,12 +192,15 @@ const UserMenu: React.FC<UserMenuProps> = ({ isOpen, onClose }) => {
               />
               <span className="text-sm text-gray-700 dark:text-gray-300">Queja</span>
             </label>
-            <label className="flex items-center">
+
+            <label htmlFor="radio-sugerencia" className="flex items-center cursor-pointer">
               <input
+                id="radio-sugerencia"
                 type="radio"
+                name="tipo"
                 value="sugerencia"
                 checked={complaintType === 'sugerencia'}
-               onChange={() => setComplaintType('sugerencia')}
+                onChange={() => setComplaintType('sugerencia')}
                 className="mr-2"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300">Sugerencia</span>
