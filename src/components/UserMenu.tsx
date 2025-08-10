@@ -215,3 +215,89 @@ const UserMenu: React.FC<UserMenuProps> = ({ isOpen, onClose }) => {
           <textarea
             value={complaintMessage}
             onChange={(e) => setComplaintMessage(e.target.value)}
+            placeholder={`Escribe tu ${complaintType} aquí...`}
+            rows={4}
+            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none"
+          />
+        </div>
+
+        {/* Botones */}
+        <div className="flex gap-3">
+          <button
+            onClick={() => setCurrentView('view-complaints')}
+            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+          >
+            <Eye className="w-4 h-4" />
+            Ver mis {complaintType === 'queja' ? 'quejas' : 'sugerencias'}
+          </button>
+          <button
+            onClick={handleSubmitComplaint}
+            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+          >
+            <Send className="w-4 h-4" />
+            Enviar {complaintType}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderViewComplaints = () => (
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <button onClick={() => setCurrentView('complaints')} className="text-gray-400 hover:text-gray-600">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Mis Quejas y Sugerencias</h2>
+        </div>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-white">
+          <X className="w-6 h-6" />
+        </button>
+      </div>
+
+      <div className="space-y-3 max-h-96 overflow-y-auto">
+        {complaints.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+            No tienes quejas o sugerencias registradas
+          </p>
+        ) : (
+          complaints.map((complaint) => (
+            <div key={complaint.id} className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  complaint.type === 'queja' 
+                    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' 
+                    : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                }`}>
+                  {complaint.type === 'queja' ? 'Queja' : 'Sugerencia'}
+                </span>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  complaint.status === 'pendiente' 
+                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' 
+                    : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                }`}>
+                  {complaint.status === 'pendiente' ? 'Pendiente' : 'Revisado'}
+                </span>
+              </div>
+              <p className="text-gray-700 dark:text-gray-300 text-sm mb-2">{complaint.message}</p>
+              <p className="text-gray-500 dark:text-gray-400 text-xs">Fecha: {complaint.date}</p>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
+        {currentView === 'menu' && renderMenu()}
+        {currentView === 'complaints' && renderComplaints()}
+        {currentView === 'view-complaints' && renderViewComplaints()}
+      </div>
+    </div>
+  );
+};
+
+export default UserMenu;
