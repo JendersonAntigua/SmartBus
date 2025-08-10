@@ -7,9 +7,11 @@ interface UserMenuProps {
   onClose: () => void;
 }
 
+type ComplaintType = 'queja' | 'sugerencia';
+
 interface Complaint {
   id: string;
-  type: 'queja' | 'sugerencia';
+  type: ComplaintType;
   message: string;
   date: string;
   status: 'pendiente' | 'revisado';
@@ -21,7 +23,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ isOpen, onClose }) => {
     return document.documentElement.classList.contains('dark');
   });
   const [currentView, setCurrentView] = useState<'menu' | 'complaints' | 'view-complaints'>('menu');
-  const [complaintType, setComplaintType] = useState<'queja' | 'sugerencia'>('queja');
+  const [complaintType, setComplaintType] = useState<ComplaintType>('queja');
   const [complaintMessage, setComplaintMessage] = useState('');
   const [complaints, setComplaints] = useState<Complaint[]>([
     {
