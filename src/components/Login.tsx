@@ -34,6 +34,14 @@ const Login: React.FC = () => {
   
   const { login } = useAuth();
 
+  // Cargar username recordado al montar el componente
+  useEffect(() => {
+    const rememberedUsername = localStorage.getItem('smartbus_remembered_username');
+    if (rememberedUsername) {
+      setUsername(rememberedUsername);
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -209,6 +217,7 @@ const Login: React.FC = () => {
             onChange={(e) => setUsername(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
             placeholder="Ingresa tu usuario"
+            autoComplete="username"
             required
           />
         </div>
@@ -225,6 +234,7 @@ const Login: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
             placeholder="Ingresa tu contraseña"
+            autoComplete="current-password"
             required
           />
         </div>
@@ -264,6 +274,11 @@ const Login: React.FC = () => {
         <div className="text-xs text-gray-600 space-y-1">
           <p><strong>Usuario:</strong> Julissa | <strong>Contraseña:</strong> 12345</p>
           <p><strong>Usuario:</strong> Admin | <strong>Contraseña:</strong> 12345</p>
+        </div>
+        <div className="mt-2 p-2 bg-blue-50 rounded border border-blue-200">
+          <p className="text-xs text-blue-700">
+            <strong>Seguridad:</strong> Tu sesión expirará automáticamente después de 20 minutos de inactividad.
+          </p>
         </div>
       </div>
     </div>
