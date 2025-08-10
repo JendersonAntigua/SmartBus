@@ -54,7 +54,7 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, isSelected, isExpanded, on
         
         <div className="flex justify-between items-center text-xs">
           <span className="text-gray-600 dark:text-gray-300">
-            {route.busCount} buses
+            {route.busCount} autobuses
           </span>
           <span className="text-gray-600 dark:text-gray-300">
             {route.stopCount} paradas
