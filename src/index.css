@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Prevenir traducción automática en toda la aplicación */
+* {
+  translate: no;
+}
+
+.notranslate {
+  translate: no !important;
+}
+
+/* Asegurar que el contenido mantenga el idioma español */
+html {
+  lang: es !important;
+}
+
+body {
+  translate: no;
+}

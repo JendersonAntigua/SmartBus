@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -7,10 +7,24 @@
      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
      crossorigin=""/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="Content-Language" content="es">
+    <meta name="language" content="Spanish">
+    <meta name="google" content="notranslate">
+    <meta name="robots" content="notranslate">
     <title>SMARTBUS - Aplicación Web Completa</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Prevenir traducción automática del navegador
+      document.documentElement.setAttribute('translate', 'no');
+      document.documentElement.className += ' notranslate';
+      
+      // Configurar idioma fijo
+      if (navigator.language && navigator.language !== 'es' && navigator.language !== 'es-ES') {
+        console.log('Idioma del navegador detectado:', navigator.language, '- Manteniendo español como idioma de la aplicación');
+      }
+    </script>
   </body>
 </html>
