@@ -184,7 +184,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ isOpen, onClose }) => {
                 type="radio"
                 value="queja"
                 checked={complaintType === 'queja'}
-                onChange={(e) => setComplaintType(e.target.value as 'queja')}
+                onChange={() => setComplaintType('queja')}
                 className="mr-2"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300">Queja</span>
