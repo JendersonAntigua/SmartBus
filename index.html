@@ -3,10 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#1e40af" />
+    <meta name="background-color" content="#1e40af" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="SMARTBUS" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="msapplication-TileColor" content="#1e40af" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    
+    <!-- PWA Icons -->
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png" />
+    <link rel="mask-icon" href="/icons/icon-192x192.png" color="#1e40af" />
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
      crossorigin=""/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta http-equiv="Content-Language" content="es">
     <meta name="language" content="Spanish">
     <meta name="google" content="notranslate">
@@ -25,6 +46,113 @@
       if (navigator.language && navigator.language !== 'es' && navigator.language !== 'es-ES') {
         console.log('Idioma del navegador detectado:', navigator.language, '- Manteniendo español como idioma de la aplicación');
       }
+      
+      // Registrar Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registrado exitosamente:', registration.scope);
+              
+              // Verificar actualizaciones
+              registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // Nueva versión disponible
+                    if (confirm('Nueva versión de SMARTBUS disponible. ¿Actualizar ahora?')) {
+                      newWorker.postMessage({ type: 'SKIP_WAITING' });
+                      window.location.reload();
+                    }
+                  }
+                });
+              });
+            })
+            .catch((error) => {
+              console.log('Error al registrar SW:', error);
+            });
+        });
+      }
+      
+      // Detectar instalación de PWA
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Mostrar botón de instalación personalizado después de 30 segundos
+        setTimeout(() => {
+          if (deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
+            showInstallPrompt();
+          }
+        }, 30000);
+      });
+      
+      function showInstallPrompt() {
+        const installBanner = document.createElement('div');
+        installBanner.innerHTML = `
+          <div style="
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: #1e40af;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: Arial, sans-serif;
+          ">
+            <div style="flex: 1;">
+              <div style="font-weight: bold; margin-bottom: 4px;">📱 Instalar SMARTBUS</div>
+              <div style="font-size: 14px; opacity: 0.9;">Accede más rápido desde tu pantalla de inicio</div>
+            </div>
+            <div>
+              <button onclick="installApp()" style="
+                background: white;
+                color: #1e40af;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-weight: bold;
+                margin-right: 8px;
+                cursor: pointer;
+              ">Instalar</button>
+              <button onclick="this.parentElement.parentElement.parentElement.remove()" style="
+                background: transparent;
+                color: white;
+                border: 1px solid rgba(255,255,255,0.3);
+                padding: 8px 12px;
+                border-radius: 6px;
+                cursor: pointer;
+              ">✕</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(installBanner);
+      }
+      
+      window.installApp = async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          console.log('Resultado de instalación:', outcome);
+          deferredPrompt = null;
+          
+          // Remover banner
+          const banner = document.querySelector('[style*="position: fixed"]');
+          if (banner) banner.remove();
+        }
+      };
+      
+      // Detectar si ya está instalada como PWA
+      window.addEventListener('appinstalled', (evt) => {
+        console.log('PWA instalada exitosamente');
+      });
     </script>
   </body>
 </html>

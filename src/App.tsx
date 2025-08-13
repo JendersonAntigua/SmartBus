@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import AdminDashboard from './components/AdminDashboard';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
+import OfflineIndicator from './components/OfflineIndicator';
 
 const AppContent: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -17,7 +19,13 @@ const AppContent: React.FC = () => {
   }
   
   // Para usuarios normales, mostrar dashboard regular
-  return <Dashboard />;
+  return (
+    <>
+      <Dashboard />
+      <PWAInstallPrompt />
+      <OfflineIndicator />
+    </>
+  );
 };
 
 function App() {
