@@ -2,11 +2,22 @@ import React from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
+import AdminDashboard from './components/AdminDashboard';
 
 const AppContent: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   
-  return isAuthenticated ? <Dashboard /> : <Login />;
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+  
+  // Si el usuario es Admin, mostrar vista de administrador
+  if (user?.username === 'Admin') {
+    return <AdminDashboard />;
+  }
+  
+  // Para usuarios normales, mostrar dashboard regular
+  return <Dashboard />;
 };
 
 function App() {
