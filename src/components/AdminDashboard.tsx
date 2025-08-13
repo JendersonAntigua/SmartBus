@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bus, AlertTriangle, Clock, CheckCircle, Info, User, LogOut, X, ArrowLeft } from 'lucide-react';
+import { Bus, AlertTriangle, Clock, CheckCircle, Info, User, LogOut, X, ArrowLeft, Plus, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface Fault {
@@ -33,6 +33,21 @@ const AdminDashboard: React.FC = () => {
   const [selectedFault, setSelectedFault] = useState<Fault | null>(null);
   const [filterStatus, setFilterStatus] = useState<'Pendientes' | 'Alta' | 'Media' | 'Baja' | 'Completadas'>('Pendientes');
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showRegisterFault, setShowRegisterFault] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+  });
+
+  // Estados para registro de falla
+  const [newFault, setNewFault] = useState({
+    type: 'Exceso de Velocidad' as Fault['type'],
+    busId: '',
+    description: '',
+    priority: 'Media' as Fault['priority'],
+    details: '',
+    route: '',
+    driver: ''
+  });
 
   const [faults, setFaults] = useState<Fault[]>([
     {
@@ -114,6 +129,20 @@ const AdminDashboard: React.FC = () => {
     }
   ]);
 
+  const handleToggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark:bg-gray-900');
+      localStorage.setItem('darkMode', 'true');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark:bg-gray-900');
+      localStorage.setItem('darkMode', 'false');
+    }
+  };
+
   const getStatsCount = () => {
     const pendingFaults = faults.filter(f => f.status === 'Pendiente');
     return {
@@ -135,8 +164,50 @@ const AdminDashboard: React.FC = () => {
   };
 
   const handleResolveFault = (faultId: string) => {
-    setFaults(prev => prev.filter(f => f.id !== faultId));
+    setFaults(prev => prev.map(f => 
+      f.id === faultId 
+        ? { ...f, status: 'Completada' as const }
+        : f
+    ));
     setSelectedFault(null);
+  };
+
+  const handleRegisterFault = () => {
+    if (!newFault.busId.trim() || !newFault.description.trim()) {
+      alert('Por favor completa los campos obligatorios (ID del Bus y Descripción)');
+      return;
+    }
+
+    const now = new Date();
+    const fault: Fault = {
+      id: `${newFault.busId}-${Date.now()}`,
+      type: newFault.type,
+      busId: newFault.busId,
+      description: newFault.description,
+      priority: newFault.priority,
+      status: 'Pendiente',
+      date: now.toLocaleDateString('es-DO'),
+      time: now.toLocaleTimeString('es-DO'),
+      details: newFault.details || newFault.description,
+      route: newFault.route || 'No especificada',
+      driver: newFault.driver || 'No especificado'
+    };
+
+    setFaults(prev => [fault, ...prev]);
+    
+    // Limpiar formulario
+    setNewFault({
+      type: 'Exceso de Velocidad',
+      busId: '',
+      description: '',
+      priority: 'Media',
+      details: '',
+      route: '',
+      driver: ''
+    });
+    
+    setShowRegisterFault(false);
+    alert('Falla registrada exitosamente');
   };
 
   const getPriorityColor = (priority: string) => {
@@ -183,9 +254,6 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="bg-green-600 px-4 py-2 rounded-lg">
-                <span className="text-yellow-400 font-semibold">QR y Saldo: RD$ 0</span>
-              </div>
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
@@ -198,8 +266,16 @@ const AdminDashboard: React.FC = () => {
                 {showUserMenu && (
                   <div className="absolute right-0 top-full mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 min-w-[200px] z-50">
                     <button
+                      onClick={handleToggleDarkMode}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 rounded-t-lg transition-colors text-gray-700 dark:text-gray-300"
+                    >
+                      {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                      <span>Modo {isDarkMode ? 'Claro' : 'Oscuro'}</span>
+                    </button>
+                    <div className="border-t border-gray-200 dark:border-gray-600"></div>
+                    <button
                       onClick={logout}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors text-red-600 dark:text-red-400"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 rounded-b-lg transition-colors text-red-600 dark:text-red-400"
                     >
                       <LogOut className="w-5 h-5" />
                       <span>Cerrar Sesión</span>
@@ -215,49 +291,49 @@ const AdminDashboard: React.FC = () => {
       <div className="container mx-auto px-4 py-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-xl shadow-md p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-2xl font-bold text-red-600">{stats.criticas}</h3>
-                <p className="text-gray-600 text-sm">Críticas</p>
+                <p className="text-gray-600 dark:text-gray-300 text-sm">Críticas</p>
               </div>
-              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
                 <AlertTriangle className="w-5 h-5 text-red-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-2xl font-bold text-yellow-600">{stats.medias}</h3>
-                <p className="text-gray-600 text-sm">Medias</p>
+                <p className="text-gray-600 dark:text-gray-300 text-sm">Medias</p>
               </div>
-              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
                 <Clock className="w-5 h-5 text-yellow-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-2xl font-bold text-blue-600">{stats.bajas}</h3>
-                <p className="text-gray-600 text-sm">Bajas</p>
+                <p className="text-gray-600 dark:text-gray-300 text-sm">Bajas</p>
               </div>
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
                 <Info className="w-5 h-5 text-blue-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-2xl font-bold text-green-600">{stats.resueltas}</h3>
-                <p className="text-gray-600 text-sm">Resueltas</p>
+                <p className="text-gray-600 dark:text-gray-300 text-sm">Resueltas</p>
               </div>
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
                 <CheckCircle className="w-5 h-5 text-green-600" />
               </div>
             </div>
@@ -266,13 +342,13 @@ const AdminDashboard: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Fallas Pendientes */}
-          <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Fallas Pendientes</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Fallas Pendientes</h2>
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value as any)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="Pendientes">Pendientes</option>
                 <option value="Alta">Alta</option>
@@ -287,22 +363,22 @@ const AdminDashboard: React.FC = () => {
                 <div
                   key={fault.id}
                   onClick={() => setSelectedFault(fault)}
-                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
                       <span className="text-2xl">{getPriorityIcon(fault.type)}</span>
                       <div>
-                        <h3 className="font-medium text-gray-900">{fault.type}</h3>
-                        <p className="text-sm text-gray-600">{fault.busId}</p>
-                        <p className="text-sm text-gray-500">{fault.description}</p>
+                        <h3 className="font-medium text-gray-900 dark:text-white">{fault.type}</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">{fault.busId}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{fault.description}</p>
                       </div>
                     </div>
                     <div className="text-right">
                       <span className={`px-2 py-1 rounded text-xs font-medium border ${getPriorityColor(fault.priority)}`}>
                         {fault.priority}
                       </span>
-                      <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center mt-2">
+                      <div className="w-6 h-6 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mt-2">
                         <Info className="w-4 h-4 text-red-600" />
                       </div>
                     </div>
@@ -312,51 +388,187 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Rendimiento de Autobuses */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Rendimiento de Autobuses</h2>
-            
-            <div className="space-y-4">
-              {busPerformance.map((bus) => (
-                <div key={bus.id} className="p-4 border border-gray-200 rounded-lg">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-medium text-gray-900">{bus.id}</h3>
-                      <p className="text-sm text-gray-600">{bus.route}</p>
-                      <p className="text-sm text-gray-500">{bus.driver}</p>
-                    </div>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(bus.status)}`}>
-                      {bus.status}
-                    </span>
-                  </div>
+          {/* Registrar Fallas */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Registrar Fallas</h2>
+              <button
+                onClick={() => setShowRegisterFault(!showRegisterFault)}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Nueva Falla
+              </button>
+            </div>
 
-                  <div className="flex items-center justify-between text-sm mb-2">
-                    <div className="flex gap-4">
-                      <span className="text-red-600">{bus.alta} Alta</span>
-                      <span className="text-yellow-600">{bus.media} Media</span>
-                      <span className="text-blue-600">{bus.baja} Baja</span>
-                    </div>
-                  </div>
+            {showRegisterFault && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Tipo de Falla *
+                  </label>
+                  <select
+                    value={newFault.type}
+                    onChange={(e) => setNewFault({...newFault, type: e.target.value as Fault['type']})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="Exceso de Velocidad">Exceso de Velocidad</option>
+                    <option value="Falla en Puertas">Falla en Puertas</option>
+                    <option value="Aire Acondicionado">Aire Acondicionado</option>
+                    <option value="Limpiaparabrisas">Limpiaparabrisas</option>
+                  </select>
+                </div>
 
-                  <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                    <span>📅 Mantenimiento: {bus.maintenance}</span>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    ID del Bus *
+                  </label>
+                  <input
+                    type="text"
+                    value={newFault.busId}
+                    onChange={(e) => setNewFault({...newFault, busId: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Ej: A123456"
+                  />
+                </div>
 
-                  <div className="mb-2">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Eficiencia</span>
-                      <span>{bus.efficiency}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full ${bus.efficiency >= 70 ? 'bg-green-500' : bus.efficiency >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
-                        style={{ width: `${bus.efficiency}%` }}
-                      />
-                    </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Descripción *
+                  </label>
+                  <input
+                    type="text"
+                    value={newFault.description}
+                    onChange={(e) => setNewFault({...newFault, description: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Descripción breve de la falla"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Prioridad
+                  </label>
+                  <select
+                    value={newFault.priority}
+                    onChange={(e) => setNewFault({...newFault, priority: e.target.value as Fault['priority']})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="Alta">Alta</option>
+                    <option value="Media">Media</option>
+                    <option value="Baja">Baja</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Ruta
+                  </label>
+                  <input
+                    type="text"
+                    value={newFault.route}
+                    onChange={(e) => setNewFault({...newFault, route: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Ej: Ruta Centro - Zona Colonial"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Conductor
+                  </label>
+                  <input
+                    type="text"
+                    value={newFault.driver}
+                    onChange={(e) => setNewFault({...newFault, driver: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Nombre del conductor"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Detalles Técnicos
+                  </label>
+                  <textarea
+                    value={newFault.details}
+                    onChange={(e) => setNewFault({...newFault, details: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={3}
+                    placeholder="Detalles adicionales sobre la falla"
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowRegisterFault(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleRegisterFault}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Registrar Falla
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!showRegisterFault && (
+              <div className="text-center py-8">
+                <Plus className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-500 dark:text-gray-400">Haz clic en "Nueva Falla" para registrar una falla</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Rendimiento de Autobuses */}
+        <div className="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Rendimiento de Autobuses</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {busPerformance.map((bus) => (
+              <div key={bus.id} className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 className="font-medium text-gray-900 dark:text-white">{bus.id}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{bus.route}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{bus.driver}</p>
+                  </div>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(bus.status)}`}>
+                    {bus.status}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-sm mb-2">
+                  <div className="flex gap-4">
+                    <span className="text-red-600">{bus.alta} Alta</span>
+                    <span className="text-yellow-600">{bus.media} Media</span>
+                    <span className="text-blue-600">{bus.baja} Baja</span>
                   </div>
                 </div>
-              ))}
-            </div>
+
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 mb-2">
+                  <span>📅 Mantenimiento: {bus.maintenance}</span>
+                </div>
+
+                <div className="mb-2">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-700 dark:text-gray-300">Eficiencia</span>
+                    <span className="text-gray-900 dark:text-white">{bus.efficiency}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full ${bus.efficiency >= 70 ? 'bg-green-500' : bus.efficiency >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                      style={{ width: `${bus.efficiency}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -364,13 +576,13 @@ const AdminDashboard: React.FC = () => {
       {/* Modal de Detalle de Falla */}
       {selectedFault && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Detalle de Falla</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Detalle de Falla</h2>
                 <button 
                   onClick={() => setSelectedFault(null)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-white"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -378,18 +590,18 @@ const AdminDashboard: React.FC = () => {
 
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
                     <span className="text-2xl">{getPriorityIcon(selectedFault.type)}</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{selectedFault.type}</h3>
-                    <p className="text-sm text-gray-600">{selectedFault.busId}</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{selectedFault.type}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{selectedFault.busId}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm font-medium text-gray-700">Prioridad</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Prioridad</span>
                     <div className="mt-1">
                       <span className={`px-2 py-1 rounded text-xs font-medium border ${getPriorityColor(selectedFault.priority)}`}>
                         {selectedFault.priority}
@@ -397,42 +609,46 @@ const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-700">Estado</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Estado</span>
                     <div className="mt-1 flex items-center gap-1">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      <span className="text-sm text-red-600">Pendiente</span>
+                      <div className={`w-2 h-2 rounded-full ${selectedFault.status === 'Pendiente' ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                      <span className={`text-sm ${selectedFault.status === 'Pendiente' ? 'text-red-600' : 'text-green-600'}`}>
+                        {selectedFault.status}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <span className="text-sm font-medium text-gray-700">Descripción</span>
-                  <p className="mt-1 text-sm text-gray-600">{selectedFault.description}</p>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</span>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{selectedFault.description}</p>
                 </div>
 
                 <div>
-                  <span className="text-sm font-medium text-gray-700">Detalles Técnicos</span>
-                  <p className="mt-1 text-sm text-gray-600">{selectedFault.details}</p>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Detalles Técnicos</span>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{selectedFault.details}</p>
                 </div>
 
                 <div>
-                  <span className="text-sm font-medium text-gray-700">Fecha y Hora</span>
-                  <p className="mt-1 text-sm text-gray-600">{selectedFault.date}, {selectedFault.time}</p>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Fecha y Hora</span>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{selectedFault.date}, {selectedFault.time}</p>
                 </div>
 
                 <div className="flex gap-3 pt-4">
                   <button
                     onClick={() => setSelectedFault(null)}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
                     Cerrar
                   </button>
-                  <button
-                    onClick={() => handleResolveFault(selectedFault.id)}
-                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    Resolver
-                  </button>
+                  {selectedFault.status === 'Pendiente' && (
+                    <button
+                      onClick={() => handleResolveFault(selectedFault.id)}
+                      className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      Resolver
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
